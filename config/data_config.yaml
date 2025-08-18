@@ -54,7 +54,7 @@ dataset:
     # Gold price (USD/oz). FRED series has been unstable while testing -> providing a fallback.
     - name: "Gold_USD_oz"
       source: "fred"
-      series_id: "GOLDPMGBD228NLBM" # if unavailable, fallback below will be used
+      series_id: "GOLDAMGBD228NLBM" # if unavailable, fallback below will be used
       agg: "mean"
       fallback:
         source: "yahoo"
