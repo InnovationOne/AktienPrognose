@@ -1,0 +1,88 @@
+# High-level dataset configuration for monthly testing.
+
+dataset:
+  # Hard backtest window.
+  start_date: "2008-01-01"
+  end_date:   "2025-06-30"
+
+  # === Equities (Yahoo Finance) ===
+  equities:
+    - name: "SP500" # S&P 500 (monthly)
+      symbol: "^GSPC"
+      source: "yahoo"
+      agg: "last"
+
+  # === Macro / Market Factors (mostly FRED) ===
+  # Aggregation rule per indicator (month-end -> 'last' vs monthly -> 'mean').
+  macro:
+    # US policy rate (month-end)
+    - name: "FedFundsRate"
+      source: "fred"
+      series_id: "FEDFUNDS"
+      agg: "last"
+
+    # CPI level (YoY% is derived later in features)
+    - name: "CPI"
+      source: "fred"
+      series_id: "CPIAUCSL"
+      agg: "last"
+
+    # Unemployment rate (monthly)
+    - name: "UnemploymentRate"
+      source: "fred"
+      series_id: "UNRATE"
+      agg: "last"
+
+    # VIX expected 30d volatility (use month-end close)
+    - name: "VIX"
+      source: "fred"
+      series_id: "VIXCLS"
+      agg: "last"
+
+    # Economic Policy Uncertainty (monthly average)
+    - name: "EPU_US"
+      source: "fred"
+      series_id: "USEPUINDXM"
+      agg: "mean"
+
+    # St. Louis Financial Stress Index, v4 (weekly -> monthly avg)
+    - name: "FSI"
+      source: "fred"
+      series_id: "STLFSI4"
+      agg: "mean"
+
+    # Gold price (USD/oz). FRED series has been unstable while testing -> providing a fallback.
+    - name: "Gold_USD_oz"
+      source: "fred"
+      series_id: "GOLDPMGBD228NLBM" # if unavailable, fallback below will be used
+      agg: "mean"
+      fallback:
+        source: "yahoo"
+        symbol: "GLD" # SPDR Gold Trust ETF as proxy
+        agg: "mean"
+
+    # WTI crude oil (monthly).
+    - name: "WTI_Spot"
+      source: "fred"
+      series_id: "MCOILWTICO"
+      agg: "mean"
+
+    # USD per EUR (month-end)
+    - name: "USD_per_EUR"
+      source: "fred"
+      series_id: "DEXUSEU"
+      agg: "last"
+
+# === Downstream technical features to be built in 02_build_features_monthly.ipynb ===
+technical:
+  - "3M_SMA_Return" # Average monthly return over last 3 months
+  - "12M_SMA_Return" # Average monthly return over last 12 months
+  - "3M_Momentum" # Cumulative return last 3 months
+  - "Volatility_6M" # Std dev of monthly returns (6 months)
+  - "Return_Lag1" # Previous month's return
+  - "FedFunds_Delta_bps" # Change vs previous month in basis points
+  - "Inflation_YoY_pct" # YoY CPI % change
+
+# Authentication/secrets
+auth:
+  fred_api_key: "8d4803741c8942fc6cc902c757006412"
