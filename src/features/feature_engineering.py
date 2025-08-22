@@ -214,6 +214,22 @@ def add_targets_next_month(df: pd.DataFrame, spec: FeatureSpec) -> pd.DataFrame:
 
     return out
 
+# --- Release-lags: real-time availability of macro data ---
+DEFAULT_RELEASE_LAGS = {
+    "CPI": 1,                 # veröffentlicht i.d.R. im Folgemonat
+    "UnemploymentRate": 1,    # Arbeitsmarktbericht im Folgemonat
+    "EPU_US": 1,              # oft Verzögerung bis Folgemonat
+    # VIX, FSI, USD_per_EUR, WTI_Spot, Gold_USD_oz typ. 0
+}
+
+def apply_release_lags(df: pd.DataFrame, lags: dict[str, int], ffill_limit: int = 3) -> pd.DataFrame:
+    out = df.copy()
+    for col, lag in lags.items():
+        if col in out.columns and lag:
+            out[col] = out[col].shift(lag)
+            if ffill_limit:
+                out[col] = out[col].ffill(limit=ffill_limit)  # nutzt nur Vergangenheitsinfo
+    return out
 
 # ----------- Master builder -----------
 def build_feature_matrix(df_raw: pd.DataFrame, spec: Optional[FeatureSpec] = None) -> pd.DataFrame:
@@ -231,9 +247,12 @@ def build_feature_matrix(df_raw: pd.DataFrame, spec: Optional[FeatureSpec] = Non
     Raises:
         KeyError: If required columns are missing.
         RuntimeError: If no rows remain after dropping NaNs or non-numeric values appear."""
+    
     spec = spec or FeatureSpec()
     df = _ensure_datetime_index_sorted(df_raw)
     _require_col(df, spec.market_col)
+
+    df = apply_release_lags(df, DEFAULT_RELEASE_LAGS, ffill_limit=3)
 
     # Compose features progressively to keep each function single-responsibility.
     df = add_technical_features(df, spec)
