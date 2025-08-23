@@ -51,8 +51,8 @@ Beispielpfad: `C:\Users\<UserName>\Desktop\AktienPrognose`.
   `conda update -n base -c defaults conda`
 - **Conda‑Pakete im Env aktualisieren**:
   `conda update --all`
-- **Pip‑Pakete aktualisieren** (TensorFlow, yfinance):
-  `pip install -U tensorflow yfinance`
+- **Pip‑Pakete aktualisieren** (TensorFlow, yfinance, pyarrow, tabulate):
+  `pip install -U tensorflow yfinance pyarrow tabulate`
 - **Integritätscheck** (zeigt kaputte Abhängigkeiten):
   `pip check`
 
